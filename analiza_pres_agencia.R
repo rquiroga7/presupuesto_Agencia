@@ -34,28 +34,25 @@ cotizacion <- cotizacion %>% complete(fecha = seq.Date(min(fecha), max(fecha), b
 #Utilizo los valores de presupuesto 2025
 #que dicen 1019.9 a fines de 2024 y 1207 a fines de 2025
 cot_proy <- data.frame(fecha = seq.Date(as.Date("2024-09-19"), as.Date("2025-12-31"), by = "day"))
-
 # Define the start and end dates for the two growth periods
 start_date_1 <- as.Date("2024-09-19"); end_date_1 <- as.Date("2024-12-31"); start_date_2 <- as.Date("2025-01-01"); end_date_2 <- as.Date("2025-12-31")
-
 # Define the initial and final values for each period
 initial_value_1 <- 966; final_value_1 <- 1019.9 ; final_value_2 <- 1207
-
 # Calculate the number of days in each period
 num_days_1 <- as.numeric(end_date_1 - start_date_1) ; num_days_2 <- as.numeric(end_date_2 - start_date_2)
-
 # Calculate the daily growth rate for each period
 daily_growth_rate_1 <- (final_value_1 - initial_value_1) / num_days_1 ; daily_growth_rate_2 <- (final_value_2 - final_value_1) / num_days_2
-
 # Calculate the dollar value for each day
 cot_proy$dolar <- ifelse(
   cot_proy$fecha <= end_date_1,
   initial_value_1 + daily_growth_rate_1 * as.numeric(cot_proy$fecha - start_date_1),
   final_value_1 + daily_growth_rate_2 * as.numeric(cot_proy$fecha - start_date_2)
 )
-
 cotizacion<-rbind(cotizacion %>% select(fecha,dolar), cot_proy) 
 
+#Join data and cotizacion
+data <- merge(data, cotizacion, by.x="fecha", by.y="fecha", all.x=TRUE)
+data$credito_devengado_usd <- data$credito_devengado / data$dolar
 
 #For each year in data, analyze what percentage of the total credito_devengado_usd is spent in each month
 perc_mes<-data %>% group_by(impacto_presupuestario_anio) %>% mutate(total=sum(credito_devengado_usd))  %>% ungroup() %>% group_by(impacto_presupuestario_mes,impacto_presupuestario_anio) %>% summarise(credito_devengado_usd=sum(credito_devengado_usd),total=mean(total)) %>% mutate(perc=credito_devengado_usd/total) %>% group_by(impacto_presupuestario_mes) %>% summarise(perc=mean(perc))
@@ -85,9 +82,7 @@ proy2025<-data.frame(impacto_presupuestario_anio=anio,fecha=fecha_2025,credito_d
 proy2025_mensual<-merge(proy2025,cotizacion, by.x="fecha", by.y="fecha", all.x=TRUE) %>% mutate(credito_devengado_usd=credito_devengado/dolar) 
 
 
-#Join data and cotizacion
-data <- merge(data, cotizacion, by.x="fecha", by.y="fecha", all.x=TRUE)
-data$credito_devengado_usd <- data$credito_devengado / data$dolar
+
 mensual <- data %>% filter(fecha < as.Date("2024-09-01")) %>% group_by(fecha,impacto_presupuestario_anio) %>% summarise(credito_devengado_usd=sum(credito_devengado_usd))
 todo<- rbind(mensual, proy2024_mensual, proy2025_mensual %>% select(impacto_presupuestario_anio,fecha,credito_devengado_usd))
 anual <- todo %>% group_by(impacto_presupuestario_anio) %>% summarise(credito_devengado_usd=sum(credito_devengado_usd))
@@ -102,9 +97,9 @@ todo<-merge(todo, cotizacion,by ="fecha") %>% mutate(credito_devengado=credito_d
 colors9=c("#d4d400","#d4d400","#d4d400", "#31ffff", "#31ffff", "#31ffff", "#31ffff", "#a8009d", "#a8009d")  
 ggplot(anual, aes(x=as.factor(impacto_presupuestario_anio), y=credito_devengado_usd, fill=as.factor(impacto_presupuestario_anio))) +
   geom_bar(stat="identity") +
-    labs(title = "Agencia I+D+i: Presupuesto anual devengado",subtitle="En dólares a cotización oficial al momento de devengar.\nSe considera ejecución del 100% del presupuesto para 2024 y 2025",
+    labs(title = "Agencia I+D+i: Presupuesto anual devengado",subtitle="En millones de dólares a cotización oficial al momento de devengar.\nSe considera ejecución del 100% del presupuesto para 2024 y 2025",
        x = "Año",
-       y = "Credito anual devengado\n(en dólares)") +
+       y = "Credito anual devengado\n(en millones de dólares)") +
     scale_fill_manual(values=colors9) +
   theme_light(base_size=14) +
     geom_text(aes(y = credito_devengado_usd, label = round(credito_devengado_usd, 0)), vjust = -0.5,size=5) +
