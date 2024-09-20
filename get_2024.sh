@@ -76,4 +76,4 @@ curl -X POST \
             "value": "Promocion  y  Financiamiento  de  Actividades  de  Ciencia, Tecnologia e Innovacion",
             "operator": "equal"}   
     ]
-}' > 2024.json
+}' > agencia/2024.json

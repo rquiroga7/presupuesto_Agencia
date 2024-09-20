@@ -75,7 +75,7 @@ curl -X POST \
             "value": "Promocion  y  Financiamiento  de  Actividades  de  Ciencia, Tecnologia e Innovacion",
             "operator": "equal"}   
     ]
-}' > 2023.json
+}' > agencia/2023.json
 
 curl -X POST \
   https://www.presupuestoabierto.gob.ar/api/v1/credito?format=json \
@@ -154,7 +154,7 @@ curl -X POST \
             "value": "Promocion  y  Financiamiento  de  Actividades  de  Ciencia, Tecnologia e Innovacion",
             "operator": "equal"}   
     ]
-}' > 2022.json
+}' > agencia/2022.json
 
 curl -X POST \
   https://www.presupuestoabierto.gob.ar/api/v1/credito?format=json \
@@ -233,7 +233,7 @@ curl -X POST \
             "value": "Promocion  y  Financiamiento  de  Actividades  de  Ciencia, Tecnologia e Innovacion",
             "operator": "equal"}   
     ]
-}' > 2021.json
+}' > agencia/2021.json
 
 curl -X POST \
   https://www.presupuestoabierto.gob.ar/api/v1/credito?format=json \
@@ -312,7 +312,7 @@ curl -X POST \
             "value": "Promocion y Financiamiento de Actividades de Ciencia, Tecnologia e Innovacion",
             "operator": "equal"}   
     ]
-}' > 2020.json
+}' > agencia/2020.json
 
 curl -X POST \
   https://www.presupuestoabierto.gob.ar/api/v1/credito?format=json \
@@ -391,7 +391,7 @@ curl -X POST \
             "value": "Promocion y Financiamiento de Actividades de Ciencia, Tecnologia e Innovacion",
             "operator": "equal"}   
     ]
-}' > 2019.json
+}' > agencia/2019.json
 
 
 curl -X POST \
@@ -471,7 +471,7 @@ curl -X POST \
             "value": "Promocion y Financiamiento de Actividades de Ciencia,Tecnologia e Innovacion",
             "operator": "equal"}   
     ]
-}' > 2018.json
+}' > agencia/2018.json
 
 curl -X POST \
   https://www.presupuestoabierto.gob.ar/api/v1/credito?format=json \
@@ -550,4 +550,4 @@ curl -X POST \
             "value": "Promocion y Financiamiento de Actividades de Ciencia,Tecnologia e Innovacion",
             "operator": "equal"}   
     ]
-}' > 2017.json
+}' > agencia/2017.json
