@@ -64,7 +64,7 @@ curl -X POST \
         "ultima_actualizacion_fecha"
     ],
     "ejercicios": [
-        2024
+        2025
     ],
     "filters": [
         {
@@ -76,4 +76,4 @@ curl -X POST \
             "value": "Promocion  y  Financiamiento  de  Actividades  de  Ciencia, Tecnologia e Innovacion",
             "operator": "equal"}   
     ]
-}' > agencia/2024.json
+}' > agencia/2025.json
