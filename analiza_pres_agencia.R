@@ -291,3 +291,45 @@ ggplot() +
 
 ggsave("plots/presupuesto_agencia_proyectos_usd_mensual_2017-2025.png", 
        width = 10, height = 6, units = "in", dpi = 300)
+
+
+
+#Sin puntos
+
+
+# Plot with both monthly dots and quarterly averages
+ggplot() +
+  geom_hline(yintercept = 0, color = "black", size = 0.5) +
+  # Add connected quarterly average lines
+  geom_line(data = trimester_monthly_t,
+          aes(x = fecha,
+              y = avg_credito_devengado_usd,
+              color = as.factor(impacto_presupuestario_anio),
+              group = line_group),  # Changed from group = 1
+          size = 1.2) +
+  labs(title = "Agencia I+D+i: Crédito mensual devengado para financiar proyectos",
+       subtitle = "En millones de dólares a cotización oficial al momento de devengar.\nPromedios trimestrales",
+       x = "Fecha",
+       y = "Credito mensual devengado\n(en millones de dólares)") +
+  scale_color_manual(values = colors9) +
+  theme_light(base_size = 14) +
+  scale_y_continuous(labels = scales::comma, 
+                    limits = c(0, 11), expand=c(0,0), minor_breaks = NULL, breaks = seq(0,11,1)) +
+  scale_x_date(breaks = function(x) seq.Date(from = floor_date(min(x), "year"),
+                                           to = ceiling_date(max(x), "year"),
+                                           by = "6 months"),
+               date_labels = "%Y-%m",
+               expand = expansion(mult = c(0.02, 0.02))) +
+  theme(legend.position = "none",
+        plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+        plot.caption = element_text(size = 8)) +  # Add this line to reduce caption size)+
+  labs(caption = paste0("Agencia I+D+i financia proyectos de Investigación, Tecnología e Innovación, principalmente con financiamiento BID.\n",
+                       "Se ajustó el crédito devengado en cada mes por la cotización oficial del dólar del BCRA.\n",
+                       "Se tomaron todas las ejecuciones de crédito de la API de Presupuesto Abierto, para el programa 44, inciso \"Transferencias\".\n",
+                       "Se proyecta la ejecución presupuestaria para el resto de 2025. Se toma cotización del dólar futuro de matbarofex.\n",
+                       "Por Rodrigo Quiroga. Ver https://github.com/rquiroga7/presupuesto_Agencia"))
+
+ggsave("plots/presupuesto_agencia_proyectos_usd_mensual_nodots_2017-2025.png", 
+       width = 10, height = 6, units = "in", dpi = 300)
