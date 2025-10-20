@@ -50,15 +50,20 @@ cotizacion <- cotizacion %>%
 last_day <- max(cotizacion$fecha)
 last_month <- as.Date(paste0(year(last_day), "-", sprintf("%02d", month(last_day)), "-01"))
 #Tengo que proyectar la cotizacion del dolar
-#Utilizo los valores de presupuesto 2025
-#que dicen 1019.9 a fines de 2024 y 1207 a fines de 2025
 #reemplazar por valores dolar futuro 
-cot_proy <- data.frame(fecha = seq.Date(last_day+1, as.Date("2025-12-31"), by = "day"))
+cot_proy <- data.frame(fecha = seq.Date(last_day, as.Date("2025-12-31"), by = "day"))
 
 #merge with agencia/dolar_futuro.csv
 dolar_futuro <- read.csv("agencia/dolar_futuro.csv", sep=",")
 dolar_futuro$fecha <- as.Date(dolar_futuro$fecha)
+
+# Add last historical data point to dolar_futuro to ensure continuity
+last_dolar <- cotizacion$dolar[cotizacion$fecha == last_day]
+bridge_point <- data.frame(fecha = last_day, dolar = last_dolar)
+dolar_futuro <- rbind(bridge_point, dolar_futuro) %>% arrange(fecha)
+
 cot_proy <- merge(cot_proy, dolar_futuro, by = "fecha", all.x = TRUE) %>% 
+  arrange(fecha) %>%
   mutate(dolar = na.approx(dolar, x = fecha, xout = fecha, na.rm = FALSE))
 cotizacion<-rbind(cotizacion %>% select(fecha,dolar), cot_proy) 
 
@@ -111,7 +116,7 @@ ggplot(anual, aes(x=as.factor(impacto_presupuestario_anio), y=credito_devengado_
   scale_y_continuous(labels = scales::comma, limits = c(NA, max(anual$credito_devengado_usd) * 1.1)) +
   theme(legend.position = "none", plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))+
   labs(caption = paste0("Agencia I+D+i financia proyectos de Investigación, Tecnología e Innovación, principalmente con financiamiento BID.\nSe ajustó el crédito devengado en cada mes por la cotización oficial del dólar del BCRA.\nSe proyecta la ejecución presupuestaria para el resto de 2025. Se toma cotización del dólar futuro de matbarofex.\nPor Rodrigo Quiroga. Ver https://github.com/rquiroga7/presupuesto_Agencia "))
-  ggsave("plots/presupuesto_agencia_usd_2017-2025.png",width = 10, height = 6, units = "in",dpi=300)
+  ggsave("plots/presupuesto_agencia_usd_anual_2017-2025.png",width = 10, height = 6, units = "in",dpi=300)
 
 # Calculate quarterly averages
 mensual <- mensual %>% mutate(quarter = lubridate::quarter(fecha, with_year = TRUE))
