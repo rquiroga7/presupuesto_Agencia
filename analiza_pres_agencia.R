@@ -38,9 +38,16 @@ data %>% group_by(impacto_presupuestario_anio) %>% summarise(credito_devengado=s
 #Lee cotizacion dolar
 cotizacion <- read_excel("com3500.xls", col_names = FALSE, skip = 4, .name_repair = "minimal")
 cotizacion <- data.frame(
-  fecha = as.Date(cotizacion[[1]], format = "%d-%m-%y"),
+  fecha = as.Date(cotizacion[[1]]),
   dolar = as.numeric(cotizacion[[2]])
 )
+
+#merge with agencia/dolar_futuro.csv for future projections
+dolar_futuro <- read.csv("agencia/dolar_futuro.csv", sep=",")
+dolar_futuro$fecha <- as.Date(dolar_futuro$fecha)
+
+#Combine cotizacion with dolar_futuro, keeping cotizacion values where available
+cotizacion <- rbind(cotizacion, dolar_futuro %>% filter(fecha > max(cotizacion$fecha)))
 
 #interpolate dolar for all missing dates in cotizacion
 cotizacion <- cotizacion %>% 
@@ -48,19 +55,7 @@ cotizacion <- cotizacion %>%
   mutate(dolar = na.approx(dolar, x = fecha, xout = fecha, na.rm = FALSE))
 
 last_day <- max(cotizacion$fecha)
-last_month <- as.Date(paste0(year(last_day), "-", sprintf("%02d", month(last_day)), "-01"))
-#Tengo que proyectar la cotizacion del dolar
-#Utilizo los valores de presupuesto 2025
-#que dicen 1019.9 a fines de 2024 y 1207 a fines de 2025
-#reemplazar por valores dolar futuro 
-cot_proy <- data.frame(fecha = seq.Date(last_day+1, as.Date("2025-12-31"), by = "day"))
-
-#merge with agencia/dolar_futuro.csv
-dolar_futuro <- read.csv("agencia/dolar_futuro.csv", sep=",")
-dolar_futuro$fecha <- as.Date(dolar_futuro$fecha)
-cot_proy <- merge(cot_proy, dolar_futuro, by = "fecha", all.x = TRUE) %>% 
-  mutate(dolar = na.approx(dolar, x = fecha, xout = fecha, na.rm = FALSE))
-cotizacion<-rbind(cotizacion %>% select(fecha,dolar), cot_proy) 
+last_month <- as.Date(paste0(year(last_day), "-", sprintf("%02d", month(last_day)), "-01")) 
 
 #Join data and cotizacion
 data <- merge(data, cotizacion, by.x="fecha", by.y="fecha", all.x=TRUE)
