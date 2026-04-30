@@ -1,5 +1,10 @@
-curl -X POST \
-  https://www.presupuestoabierto.gob.ar/api/v1/credito?format=json \
+#!/usr/bin/env bash
+
+# Ensure target directory exists
+mkdir -p agencia
+
+curl -sS -X POST \
+    https://www.presupuestoabierto.gob.ar/api/v1/credito?format=json \
   -H 'Authorization: cbbd85c1-1986-4491-a5f6-8de8f4deb733' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -64,7 +69,7 @@ curl -X POST \
         "ultima_actualizacion_fecha"
     ],
     "ejercicios": [
-        2025
+        2026
     ],
     "filters": [
         {
@@ -76,4 +81,13 @@ curl -X POST \
             "value": "Promocion  y  Financiamiento  de  Actividades  de  Ciencia, Tecnologia e Innovacion",
             "operator": "equal"}   
     ]
-}' > agencia/2025.json
+}' > agencia/2026.json
+
+# Download BCRA exchange rate spreadsheet for com3500
+bcra_url="https://www.bcra.gob.ar/pdfs/publicacionesestadisticas/com3500.xls"
+echo "Downloading com3500.xls from $bcra_url..."
+curl -sS -f "$bcra_url" -o com3500.xls || {
+    echo "Failed to download com3500.xls" >&2
+    exit 1
+}
+echo "Saved com3500.xls"

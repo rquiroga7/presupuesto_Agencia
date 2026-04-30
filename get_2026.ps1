@@ -71,7 +71,7 @@ $body = @{
         "credito_pagado",
         "ultima_actualizacion_fecha"
     )
-    ejercicios = @(2025)
+    ejercicios = @(2026)
     filters = @(
         @{
             column = "programa_id"
@@ -88,17 +88,25 @@ $body = @{
 
 # Make the POST request and save response to file
 try {
-    Write-Host "Making API request..." -ForegroundColor Yellow
-    $response = Invoke-RestMethod -Uri $uri -Method POST -Headers $headers -Body $body -ContentType "application/json"
-    
-    # Ensure the agencia directory exists
+    Write-Host "Making API request (saving raw JSON to agencia\\2026.json)..." -ForegroundColor Yellow
+
+    # Ensure the agencia directory exists before writing
     if (!(Test-Path "agencia")) {
         New-Item -ItemType Directory -Path "agencia" | Out-Null
     }
-    
-    # Save response to JSON file
-    $response | ConvertTo-Json -Depth 10 | Out-File -FilePath "agencia\2025.json" -Encoding UTF8
-    Write-Host "Data successfully saved to agencia\2025.json" -ForegroundColor Green
+
+    # Save the raw server response bytes directly to agencia\2026.json
+    Invoke-WebRequest -Uri $uri -Method POST -Headers $headers -Body $body -ContentType "application/json" -OutFile "agencia\\2026.json"
+
+    Write-Host "Data successfully saved to agencia\2026.json" -ForegroundColor Green
+    # Download BCRA exchange-rate Excel (com3500.xls)
+    $bcraUrl = "https://www.bcra.gob.ar/pdfs/publicacionesestadisticas/com3500.xls"
+    try {
+        Invoke-WebRequest -Uri $bcraUrl -OutFile "com3500.xls"
+        Write-Host "Downloaded com3500.xls" -ForegroundColor Green
+    } catch {
+        Write-Warning "Failed to download com3500.xls: $($_.Exception.Message)"
+    }
     
 } catch {
     Write-Error "Failed to fetch data: $($_.Exception.Message)"
