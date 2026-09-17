@@ -11,22 +11,8 @@ library(lubridate)
 
 
 # Read json files into table (2017-2026) with a robust reader that handles BOM and common encodings
-read_json_robust <- function(path) {
-  # Try UTF-8 first
-  txt <- tryCatch(readLines(path, encoding = "UTF-8", warn = FALSE), error = function(e) NULL)
-  if (!is.null(txt) && length(txt) > 0) {
-    s <- paste(txt, collapse = "\n")
-    s <- sub('^\ufeff', '', s)
-    res <- tryCatch(jsonlite::fromJSON(s), error = function(e) NULL)
-    if (!is.null(res)) return(res)
-  }
-  # Fallback: read as Latin1 and convert to UTF-8
-  txt <- readLines(path, encoding = "latin1", warn = FALSE)
-  s <- paste(txt, collapse = "\n")
-  s <- iconv(s, from = "latin1", to = "UTF-8")
-  s <- sub('^\ufeff', '', s)
-  jsonlite::fromJSON(s)
-}
+# (read_json_robust lives in funciones_agencia.R, shared with analiza_pres_agencia_anualizado.R)
+source("funciones_agencia.R")
 
 data2017 <- read_json_robust("agencia/2017.json")  %>% mutate(impacto_presupuestario_fecha=as.Date(paste0(impacto_presupuestario_anio,"-",impacto_presupuestario_mes,"-01")))
 data2018 <- read_json_robust("agencia/2018.json") %>% mutate(impacto_presupuestario_fecha=as.Date(paste0(impacto_presupuestario_anio,"-",impacto_presupuestario_mes,"-01")))
